@@ -68,4 +68,4 @@ This project is licensed under the MIT License. See the LICENSE file for more de
 
 ## Special thanks to all the contributors
 
-[![Contributors](https://contrib.rocks/image?repo=noaa-gml/rtorf)](https://github.com/noaa-gml/rtorf/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=noaa-gml/pytorf)](https://github.com/noaa-gml/pytorf/graphs/contributors)
