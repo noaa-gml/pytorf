@@ -28,6 +28,18 @@ To use the `obs_read_nc` function, you can import it from the package and call i
 from pytorf.obs_read_nc import obs_read_nc
 
 # Assuming you have an index DataFrame ready
+`obs_summary` takes the input of the obspack directory and return a DataFrame
+categories=["aircraft-pfp",
+            "aircraft-insitu", 
+            "surface-insitu",
+            "tower-insitu", 
+            "aircore",
+            "surface-pfp",
+            "shipboard-insitu",
+            "flask"]
+obs = "Z:/torf/obspack_ch4_1_GLOBALVIEWplus_v5.1_2023-03-08/data/nc/"
+index = obs_summary(obs = obs)
+
 data = obs_read_nc(index, categories="flask", solar_time=False, as_list=False, verbose=True)
 ```
 
