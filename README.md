@@ -18,7 +18,7 @@ so it can be installed in any machine.
 To install the package, you can clone the repository and install the required dependencies using pip:
 
 ```bash
-git clone https://github.com/yourusername/pytorf.git
+git clone https://github.com/noaa-gml/pytorf.git
 cd pytorf
 pip install -r requirements.txt
 ```
