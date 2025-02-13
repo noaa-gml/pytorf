@@ -25,7 +25,7 @@ pip install .
 To use the `obs_read_nc` function, you can import it from the package and call it with the appropriate parameters. Here is a basic example:
 
 ```python
-from pytorf.obs_read_nc import obs_read_nc
+import pytorf
 
 # Assuming you have an index DataFrame ready
 `obs_summary` takes the input of the obspack directory and return a DataFrame
