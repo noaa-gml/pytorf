@@ -1,0 +1,45 @@
+<!-- filepath: pytorf/pytorf/website/src/about.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About pytorf</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>About pytorf</h1>
+    </header>
+    <main>
+        <section>
+            <h2>Overview</h2>
+            <p>pytorf is a Python package designed for reading NetCDF files into Pandas DataFrames. It provides a convenient function, <code>obs_read_nc</code>, which allows users to extract and manipulate observational data from NetCDF files efficiently.</p>
+        </section>
+        <section>
+            <h2>Features</h2>
+            <ul>
+                <li>Easy integration with Pandas for data manipulation.</li>
+                <li>Support for various observational data formats.</li>
+                <li>Efficient data extraction and processing capabilities.</li>
+            </ul>
+        </section>
+        <section>
+            <h2>Usage</h2>
+            <p>To use the <code>obs_read_nc</code> function, you can import it from the package and call it with the appropriate parameters. Here is a basic example:</p>
+            <pre><code>from pytorf.obs_read_nc import obs_read_nc
+
+# Assuming you have an index DataFrame ready
+data = obs_read_nc(index, categories="flask", solar_time=False, as_list=False, verbose=True)</code></pre>
+        </section>
+        <section>
+            <h2>Contributing</h2>
+            <p>Contributions are welcome! If you would like to contribute to the project, please follow the guidelines in the README file.</p>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2023 pytorf. All rights reserved.</p>
+    </footer>
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
