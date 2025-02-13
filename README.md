@@ -1,8 +1,20 @@
 # README.md
 
+![GitHub commit activity](https://img.shields.io/github/commit-activity/y/noaa-gml/pytorf)
+[![python-check](https://github.com/noaa-gml/pytorf/actions/workflows/python-app.yaml/badge.svg)](https://github.com/noaa-gml/pytorf/actions/workflows/python-app.yaml)
+
+![GitHub Repo stars](https://img.shields.io/github/stars/noaa-gml/pytorf)
+
+[NOAA Obspack](https://gml.noaa.gov/ccgg/obspack/) is a collection of green house gases observations
+
+`pytorf` only depends on `pandas` and `netCDF4`, which is basically parallel C, 
+so it can be installed in any machine.
+
+
 # pytorf
 
 pytorf is a Python package designed for reading NetCDF files into Pandas DataFrames. It provides a convenient function, `obs_read_nc`, which allows users to extract and manipulate observational data from NetCDF files efficiently.
+
 
 ## Installation
 
