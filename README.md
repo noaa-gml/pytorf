@@ -10,7 +10,7 @@
 so it can be installed in any machine.
 
 
-# pytorf
+# Python Tools for Obspack, Receptors and Footprints (pytorf)
 
 pytorf is a Python package designed for reading NetCDF files into Pandas DataFrames. It provides a convenient function, `obs_read_nc`, which allows users to extract and manipulate observational data from NetCDF files efficiently.
 
