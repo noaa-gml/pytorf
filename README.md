@@ -1,7 +1,7 @@
 # README.md
 
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/y/noaa-gml/pytorf)
-[![python-check](https://github.com/noaa-gml/pytorf/actions/workflows/python-app.yaml/badge.svg)](https://github.com/noaa-gml/pytorf/actions/workflows/python-app.yaml)
+[![python-check](https://github.com/noaa-gml/pytorf/actions/workflows/python-app.yml/badge.svg)](https://github.com/noaa-gml/pytorf/actions/workflows/python-app.yml)
 
 ![GitHub Repo stars](https://img.shields.io/github/stars/noaa-gml/pytorf)
 
