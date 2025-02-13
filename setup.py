@@ -3,9 +3,9 @@ from setuptools import setup, find_packages
 setup(
     name='pytorf',
     version='0.1.0',
-    author='Your Name',
-    author_email='your.email@example.com',
-    description='A package for reading NetCDF files into DataFrames',
+    author='Sergio Ibarra-Espinosa',
+    author_email='sergio.ibarra-espinosa@noaa.gov',
+    description='A package for reading Obspack NetCDF files into DataFrames',
     packages=find_packages(),
     install_requires=[
         'pandas',
