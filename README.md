@@ -1,4 +1,4 @@
-# Python Tools for Obspack, Receptors and Footprints (pytorf)
+# Python Tools for Obspack, Receptors and Footprints (pytorf) - in development
 
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/y/noaa-gml/pytorf)
 [![python-check](https://github.com/noaa-gml/pytorf/actions/workflows/python-app.yml/badge.svg)](https://github.com/noaa-gml/pytorf/actions/workflows/python-app.yml)
