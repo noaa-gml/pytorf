@@ -28,6 +28,9 @@ Alternatively, you can install the package directly from the source:
 ```bash
 pip install .
 ```
+## R version 
+
+Check the R version [rtorf]( https://github.com/noaa-gml/rtorf)
 
 ## Usage
 
