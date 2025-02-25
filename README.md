@@ -7,6 +7,8 @@
 [NOAA Obspack](https://gml.noaa.gov/ccgg/obspack/) is a collection of greenhouse gases observations
 
 
+<img src="https://github.com/noaa-gml/rtorf/blob/main/man/figures/logo.png?raw=true" align="right" alt="" width="220" />
+
 pytorf is a Python package designed for reading NetCDF files into Pandas DataFrames. It provides a convenient function, `obs_read_nc`, which allows users to extract and manipulate observational data from NetCDF files efficiently.
 
 
