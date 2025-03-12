@@ -1,4 +1,4 @@
-# Python Tools for Obspack, Receptors and Footprints (pytorf) - in development
+# Python Tools for Observations, Receptors and Footprints (pytorf) - in development
 
 <img src="https://github.com/noaa-gml/rtorf/blob/main/man/figures/logo.png?raw=true" align="right" alt="" width="220" />
 
