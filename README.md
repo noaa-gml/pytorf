@@ -72,6 +72,20 @@ Contributions are welcome! If you would like to contribute to the project, pleas
 
 This project is licensed under the MIT License. See the LICENSE file for more details.
 
-## Special thanks to all the contributors
+
+## Special thanks to all the 
+
+**contributors**
 
 [![Contributors](https://contrib.rocks/image?repo=noaa-gml/pytorf)](https://github.com/noaa-gml/pytorf/graphs/contributors)
+
+and
+
+**Stargazers**
+
+<p>
+  <a href="https://github.com/noaa-gml/pytorf/stargazers">
+    <img src="http://reporoster.com/stars/dark/noaa-gml/pytorf"/>
+  </a>
+</p>
+
