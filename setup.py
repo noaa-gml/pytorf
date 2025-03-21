@@ -4,7 +4,7 @@ setup(
     name='pytorf',
     version='0.1.0',
     author='Sergio Ibarra-Espinosa',
-    author_email='sergio.ibarra-espinosa@noaa.gov',
+    author_email='sergio.ibarraespinosa@colorad.edu',
     description='A package for reading Obspack NetCDF files into DataFrames',
     packages=find_packages(),
     install_requires=[
