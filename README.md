@@ -80,6 +80,7 @@ index_ch4 = pytorf.obs_summary(
 )
 
 ```
+```
 Number of files found: 429
 
 File counts by assigned sector:
