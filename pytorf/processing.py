@@ -4,7 +4,7 @@ Functions for processing ObsPack data (time additions, aggregation).
 """
 
 import datatable as dt
-from datatable import f, by, count, ifelse, isna, sort, update, join, rbind, agg
+from datatable import f, by, count, ifelse, isna, sort, update, join, rbind
 import math
 import datetime as pydt
 import warnings
