@@ -109,20 +109,27 @@ def obs_summary(
     num_pattern_template = r"(d-?)?(\d+)magl\.{ext}$"
 
     for i in range(index.nrows):
-      fname = index[i, f.name]
-      fext = fex(fname)
+      # Extract the string value from the single-cell Frame
+      fname_frame = index[i, f.name]
+      # Check if the frame is not empty and get the value using scalar() or to_list()
+      fname_str = fname_frame.to_list()[0][0] if fname_frame.nrows > 0 else None
+
+      if fname_str is None: continue # Skip if filename couldn't be extracted
+
+      fext = fex(fname_str) # Pass the string to fex
       if not fext: continue # Skip if no extension
 
+      # Compile regex using the extracted extension
       num_pattern = re.compile(num_pattern_template.format(ext=re.escape(fext)))
-      match = num_pattern.search(fname)
+      match = num_pattern.search(fname_str) # Search in the string
       if match:
           try:
               agl_val = float(match.group(2))
-              index[i, update(agl=agl_val)]
+              index[i, update(agl=agl_val)] # Update the original index frame
           except (ValueError, IndexError):
               if verbose:
-                  print(f"Warning: Could not parse AGL number from {fname}")
-
+                  print(f"Warning: Could not parse AGL number from {fname_str}")
+                  
     if verbose:
         agl_present = index[~isna(f.agl), count()][0, 0]
         agl_absent = index.nrows - agl_present
