@@ -22,7 +22,7 @@ pytorf provides tools to:
 - Generate HYSPLIT configuration files (CONTROL, SETUP.CFG, ASCDATA.CFG).
 - Helper functions for common data manipulation and formatting tasks.
 
-## n
+## Installation
 
 It is highly recommended to install pytorf within a virtual environment.
 
