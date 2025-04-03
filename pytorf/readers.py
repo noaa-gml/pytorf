@@ -73,18 +73,31 @@ def obs_summary(
 
     if verbose:
         print(f"Number of files found: {index.nrows}")
-        if 'sector' in index.names and index[~isna(f.sector), count()][0,0] > 0 :
-            summary = index[~isna(f.sector), count(), by(f.sector)]
-             # Calculate total only for rows with an assigned sector
-            total_assigned = summary[:, dt.sum(f.count)][0,0]
+        # Check if 'sector' exists and has non-NA values before proceeding
+    if 'sector' in index.names and index[:, dt.count(f.sector)][0, 0] > 0: # Check if *any* sectors assigned
+        # Filter out rows where sector is NA *first*
+        index_assigned = index[~isna(f.sector), :]
+
+        if index_assigned.nrows > 0: # Check if anything remains after filtering
+            # Now perform the aggregation on the filtered frame
+            summary = index_assigned[:, count(), by(f.sector)]
+
+            # Calculate total (no need for sum, just use nrows of filtered frame)
+            total_assigned = index_assigned.nrows # Total is simply the count after filtering NA
             total_frame = dt.Frame(sector=["Total assigned sectors"], N=[total_assigned])
             print("\nFile counts by assigned sector:")
+            # Use force=True in rbind just in case N column type differs slightly
             print(rbind(summary, total_frame, force=True))
-            unassigned_count = index[isna(f.sector), count()][0,0]
-            if unassigned_count > 0:
-                print(f"\nFiles without an assigned sector: {unassigned_count}")
         else:
-             print("No files were assigned a category based on the provided list.")
+            print("\nNo files were assigned a category (all sectors were NA).")
+
+
+        # Calculate unassigned count (can do this on original index)
+        unassigned_count = index[isna(f.sector), count()][0,0]
+        if unassigned_count > 0:
+            print(f"\nFiles without an assigned sector: {unassigned_count}")
+    else:
+         print("\nNo 'sector' column found or no sectors were assigned.")
 
 
     # Extract 'agl' value if 'magl' is in the filename using regex
