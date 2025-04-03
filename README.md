@@ -56,34 +56,47 @@ Assuming you have an index DataFrame ready
 ```python
 import pytorf
 
-categories=["aircraft-pfp",
-            "aircraft-insitu", 
-            "surface-insitu",
-            "tower-insitu", 
-            "aircore",
-            "surface-pfp",
-            "shipboard-insitu",
-            "flask"]
+categories = [
+    "aircraft-pfp",
+    "aircraft-insitu", #"aircraft-flask", # If flask is not in CH4 data
+    "surface-insitu", #"surface-flask",
+    "surface-pfp",
+    "tower-insitu",
+    "aircore",
+    "shipboard-insitu" #, "shipboard-flask"
+]
+print(f"categories:\n {categories}")
 
-obs = "Z:/torf/obspack_ch4_1_GLOBALVIEWplus_v5.1_2023-03-08/data/nc/"
-index = obs_summary(obs = obs)
-data = obs_read_nc(index, 
-                    categories="flask", 
-                    solar_time=False, 
-                    as_list=False, 
-                    verbose=True)
+
+obspack_ch4_dir = Path("/PATH/obspack/obspack_ch4_1_GLOBALVIEWplus_v5.1_2023-03-08/data/nc/")
+
+print(f"Directory exists? {obspack_ch4_dir.is_dir()}")
+
+index_ch4 = pytorf.obs_summary(
+    obs_path=obspack_ch4_dir,
+    categories=categories,
+    file_pattern='*.nc', # Specify NetCDF files
+    verbose=True
+)
+
 ```
-Contributing
-Contributions are welcome! Please feel free to submit bug reports, feature requests, or pull requests through GitHub.
-Fork the repository.
-Create a new branch (git checkout -b feature/your-feature-name).
-Make your changes.
-Commit your changes (git commit -am 'Add some feature').
-Push to the branch (git push origin feature/your-feature-name).
-Create a new Pull Request.
-License
-This project is licensed under the MIT License - see the LICENSE file for details.
+Number of files found: 429
 
+File counts by assigned sector:
+   | sector                  count      N
+   | str64                   int64  int32
+-- + ----------------------  -----  -----
+ 0 | aircore                     1     NA
+ 1 | aircraft-insitu            15     NA
+ 2 | aircraft-pfp               40     NA
+ 3 | shipboard-insitu            1     NA
+ 4 | surface-insitu            174     NA
+ 5 | surface-pfp                33     NA
+ 6 | tower-insitu               51     NA
+ 7 | Total assigned sectors     NA    315
+[8 rows x 3 columns]
+
+```
 
 ## Contributing
 
