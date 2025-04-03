@@ -4,7 +4,7 @@ Functions for reading ObsPack files (.txt, .nc) and metadata.
 """
 
 import datatable as dt
-from datatable import f, by, count, ifelse, isna, sort, update, join, rbind, agg
+from datatable import f, by, count, ifelse, isna, sort, update, join, rbind
 import os
 import glob
 import re
