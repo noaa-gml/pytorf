@@ -1,0 +1,65 @@
+# pyproject.toml
+
+[build-system]
+# Specifies minimum build tools needed to build the package
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+# Core package metadata (PEP 621)
+name = "pytorf" # The name used for pip install
+version = "0.1.0" # Your package version
+authors = [
+  { name="Sergio Ibarra-Espinosa", email="sergio.ibarraespinosa@colorado.edu" },
+  # Add other authors if applicable
+]
+maintainers = [
+   { name="Sergio Ibarra-Espinosa", email="sergio.ibarraespinosa@colorado.edu" },
+]
+description = "Python package for reading and processing NOAA ObsPack files, ported from R's rtorf."
+readme = "README.md" # Points to your README file for the long description
+requires-python = ">=3.8" # Specify compatible Python versions
+license = { file = "LICENSE" } # Or use SPDX identifier: { text = "MIT" }
+keywords = ["obspack", "atmospheric", "data", "noaa", "hysplit", "gml"]
+classifiers = [
+    "Development Status :: 3 - Alpha", # Or Beta, Production/Stable
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License", # Choose your license
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+]
+
+# Runtime dependencies - these get installed automatically by pip
+dependencies = [
+    "datatable>=1.0.0", # Use the correct PyPI name
+    "netCDF4>=1.6.0",
+    "numpy>=1.20.0",
+    "matplotlib>=3.5.0",
+    "PyYAML>=6.0",
+    # Add any other direct runtime dependencies
+]
+
+[project.urls]
+# Optional links displayed on PyPI
+Homepage = "https://github.com/noaa-gml/pytorf"
+Repository = "https://github.com/noaa-gml/pytorf"
+# Bug Tracker = "https://github.com/noaa-gml/pytorf/issues"
+
+# Optional dependencies (e.g., for development or specific features)
+# [project.optional-dependencies]
+# dev = [
+#     "pytest>=7.0",
+#     "flake8",
+#     # Add other development tools
+# ]
+
+# --- Tool-specific settings ---
+[tool.setuptools.packages.find]
+# Automatically find packages under 'src'
+where = ["src"]
