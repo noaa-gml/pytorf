@@ -13,7 +13,6 @@ from .plotting import obs_plot
 from .helpers import (
     fex, sr, obs_out, obs_trunc, obs_footname, obs_write_csvy,
     obs_format, obs_rbind, obs_freq, obs_roundtime, obs_read_csvy
-    obs_index, obs_addzero # Include deprecated ones if desired
 )
 # Removed: from .invfile import obs_invfiles
 
