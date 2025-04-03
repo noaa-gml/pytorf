@@ -65,12 +65,8 @@ categories = [
     "aircore",
     "shipboard-insitu" #, "shipboard-flask"
 ]
-print(f"categories:\n {categories}")
-
 
 obspack_ch4_dir = Path("/PATH/obspack/obspack_ch4_1_GLOBALVIEWplus_v5.1_2023-03-08/data/nc/")
-
-print(f"Directory exists? {obspack_ch4_dir.is_dir()}")
 
 index_ch4 = pytorf.obs_summary(
     obs_path=obspack_ch4_dir,
