@@ -69,7 +69,7 @@ def obs_summary(
     index[:, update(sector=dt.str64)] # Initialize sector column as string
     for category in categories:
         pattern = re.escape(category)
-        index[f.name.re_match(f".*{pattern}.*"), update(sector=category)]
+        index[dt.re.match(f.name, f".*{pattern}.*"), update(sector=category)]
 
     if verbose:
         print(f"Number of files found: {index.nrows}")
