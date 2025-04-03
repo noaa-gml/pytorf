@@ -62,9 +62,9 @@ def obs_summary(
     index = index[:, :, sort(f.name)] # Sort by name
 
     # Add row number
-    row_numbers_list = list(range(index.nrows)) # Create a standard Python list
-    index[:, update(n = row_numbers_list)]      # Assign the list
-    
+    temp_frame = dt.Frame(range(index.nrows))
+    index[:, update(n = temp_frame[:, 'C0'])] # Assign the 'C0' column from the temp frame
+
     # Assign sectors based on categories in filename
     index[:, update(sector=dt.str64)] # Initialize sector column as string
     for category in categories:
