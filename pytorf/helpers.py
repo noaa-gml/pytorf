@@ -10,7 +10,7 @@ from pathlib import Path
 import yaml
 import warnings
 import numpy as np
-from typing import List, Union, Optional, Tuple, Any
+from typing import List, Union, Optional, Tuple, Any, Dict
 
 # Import datatable conditionally or where needed
 try:
