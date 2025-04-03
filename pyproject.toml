@@ -19,20 +19,14 @@ maintainers = [
 description = "Python package for reading and processing NOAA ObsPack files, ported from R's rtorf."
 readme = "README.md" # Points to your README file for the long description
 requires-python = ">=3.8" # Specify compatible Python versions
-license = { file = "LICENSE" } # Or use SPDX identifier: { text = "MIT" }
+license = { text = "MIT" } # Use SPDX identifier string directly
 keywords = ["obspack", "atmospheric", "data", "noaa", "hysplit", "gml"]
 classifiers = [
-    "Development Status :: 3 - Alpha", # Or Beta, Production/Stable
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License", # Choose your license
+    # Remove: "License :: OSI Approved :: MIT License", # Classifier is deprecated
+    "License :: OSI Approved :: MIT License", # Keep this explicit one if desired for clarity, though SPDX in license field is preferred
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Topic :: Scientific/Engineering :: Atmospheric Science",
 ]
 
 # Runtime dependencies - these get installed automatically by pip
@@ -62,4 +56,4 @@ Repository = "https://github.com/noaa-gml/pytorf"
 # --- Tool-specific settings ---
 [tool.setuptools.packages.find]
 # Automatically find packages under 'src'
-where = ["src"]
+where = ["."]
