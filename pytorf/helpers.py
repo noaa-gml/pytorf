@@ -501,3 +501,189 @@ def obs_footname(
     else:
         # Return just the filename base + extension if not full path
         return f"{basename}.nc"
+    
+    def obs_julian_py(m, d, y, origin=None):
+    """
+    Calculates days since origin date using the algorithm from R's 'chron' package,
+    likely based on the "S book (p.269)".
+
+    Args:
+        m: Month (scalar or array-like).
+        d: Day (scalar or array-like).
+        y: Year (scalar or array-like).
+        origin: A tuple or list representing the origin date (month, day, year).
+                If None, defaults to (1, 1, 1960).
+
+    Returns:
+        The number of days elapsed between the origin date and the input date(s).
+        Returns a float or a NumPy array of floats.
+    """
+    # Default origin if not provided
+    if origin is None:
+        origin = (1, 1, 1960) # month, day, year
+
+    # Ensure inputs are numpy arrays for vectorized operations
+    m = np.asarray(m)
+    d = np.asarray(d)
+    y = np.asarray(y)
+    origin_m, origin_d, origin_y = origin
+
+    # Internal function to calculate the raw 'Julian Day' number using the S book algorithm
+    def _calculate_raw_jd(m_in, d_in, y_in):
+        # Ensure inputs inside are arrays
+        m_in = np.asarray(m_in)
+        d_in = np.asarray(d_in)
+        y_in = np.asarray(y_in)
+
+        # Algorithm from R code (S book p.269)
+        y_adj = y_in + np.where(m_in > 2, 0, -1)
+        m_adj = m_in + np.where(m_in > 2, -3, 9)
+        c = y_adj // 100
+        ya = y_adj - 100 * c
+        # Perform calculations using integer arithmetic where R uses %/%
+        jd = (146097 * c) // 4 + (1461 * ya) // 4 + (153 * m_adj + 2) // 5 + d_in + 1721119
+        return jd
+
+    # Calculate the raw JD for the input date(s)
+    jd_inputs = _calculate_raw_jd(m, d, y)
+
+    # Calculate the raw JD for the origin date
+    jd_origin = _calculate_raw_jd(origin_m, origin_d, origin_y)
+
+    # The result is the difference
+    days_since_origin = jd_inputs - jd_origin
+
+    # R function returns a simple numeric vector/value
+    # If the input was scalar, numpy might return a 0-dim array, convert back
+    if days_since_origin.ndim == 0:
+        return days_since_origin.item() # Return scalar float
+    return days_since_origin # Return numpy array
+
+def obs_id2pos(id_list: Union[str, List[str]],
+               sep: str = "x",
+               as_dataframe: bool = False) -> Union[pd.DataFrame, np.ndarray, Dict[str, Any], None]:
+    """
+    Replicates the R id2pos function to parse identifying labels for
+    location & time.
+
+    Returns time as fractional day since 1/1/1960 (using obs_julian_py logic) and
+    alt as altitude above ground in meters.
+
+    Args:
+        id_list: A single ID string or a list of ID strings.
+                 Format examples:
+                 '2002x08x03x10x45.00Nx090.00Ex00030' (no minutes)
+                 '2002x08x03x10x55x45.335Sx179.884Wx00030' (with minutes)
+        sep: The separator character used in the ID string (currently unused
+             as 'x' is hardcoded in the split logic based on R code).
+        as_dataframe: If True, returns a pandas DataFrame. Otherwise, returns
+                      a numpy array (if multiple valid IDs) or a 1D numpy array
+                      (if single valid ID). Returns None if no valid IDs processed.
+
+    Returns:
+        A pandas DataFrame or numpy array containing the parsed data:
+        'time', 'lat', 'lon', 'alt', 'yr', 'mon', 'day', 'hr', 'min'.
+        Returns None if input is empty or no IDs could be parsed.
+
+    Raises:
+        ValueError: If an ID string has an unexpected format.
+        TypeError: If input 'id_list' is not a string or list.
+    """
+    if isinstance(id_list, str):
+        id_list = [id_list] # Process single string as a list of one
+        single_input = True
+    elif not isinstance(id_list, list):
+        raise TypeError("Input 'id_list' must be a string or a list of strings.")
+    else:
+        single_input = False
+
+    if not id_list:
+        return None # Handle empty input list
+
+    results = []
+
+    for id_str in id_list:
+        try:
+            parts = id_str.split('x')
+            num_parts = len(parts)
+
+            encode_minutes = num_parts == 8
+
+            if not (encode_minutes or num_parts == 7):
+                 raise ValueError(f"ID string '{id_str}' has unexpected number of parts ({num_parts}). Expected 7 or 8.")
+
+            # --- Parse Date and Time ---
+            yr4 = int(parts[0])
+            mon = int(parts[1])
+            day = int(parts[2])
+            hr = int(parts[3])
+
+            ipos = 4
+
+            if encode_minutes:
+                min_val = int(parts[4])
+                frac_hr = hr + min_val / 60.0
+                ipos += 1
+            else:
+                min_val = 0
+                frac_hr = float(hr)
+
+            # --- Parse Latitude ---
+            lat_str = parts[ipos]
+            if not lat_str: raise ValueError(f"Missing latitude part in '{id_str}'")
+            lat = float(lat_str[:-1])
+            lat_sign = lat_str[-1].upper()
+            if lat_sign == "S": lat = -lat
+            elif lat_sign != "N": raise ValueError(f"Invalid latitude direction '{lat_sign}' in '{id_str}'")
+            ipos += 1
+
+            # --- Parse Longitude ---
+            lon_str = parts[ipos]
+            if not lon_str: raise ValueError(f"Missing longitude part in '{id_str}'")
+            lon = float(lon_str[:-1])
+            lon_sign = lon_str[-1].upper()
+            if lon_sign == "W": lon = -lon
+            elif lon_sign != "E": raise ValueError(f"Invalid longitude direction '{lon_sign}' in '{id_str}'")
+            ipos += 1
+
+            # --- Parse Altitude ---
+            alt_str = parts[ipos]
+            if not alt_str: raise ValueError(f"Missing altitude part in '{id_str}'")
+            alt_numeric_str = re.sub(r"[^0-9.-]+$", "", alt_str)
+            alt = float(alt_numeric_str)
+
+            # --- Calculate Time (days since epoch using obs_julian_py) ---
+            # Call the translated obs_julian function
+            days_since = obs_julian_py(mon, day, yr4) # Origin defaults to (1, 1, 1960)
+
+            # Check for NaN or potential errors from date calculation if needed
+            # (obs_julian_py currently doesn't explicitly return NaN for invalid dates like the datetime version did)
+            # The algorithm might produce unexpected results for invalid dates (e.g., Feb 30)
+            # Add a basic date validity check before calling obs_julian_py? Or trust the algorithm?
+            # Let's trust the algorithm mimics R for now.
+
+            time_val = days_since + frac_hr / 24.0
+
+            results.append({
+                "time": time_val, "lat": lat, "lon": lon, "alt": alt,
+                "yr": yr4, "mon": mon, "day": day, "hr": hr, "min": min_val
+            })
+
+        except (ValueError, IndexError, TypeError) as e:
+            print(f"Warning: Skipping ID '{id_str}' due to processing error: {e}")
+            continue
+
+    if not results:
+        return None
+
+    # --- Format Output ---
+    cols_order = ["time", "lat", "lon", "alt", "yr", "mon", "day", "hr", "min"]
+    if as_dataframe:
+        df = pd.DataFrame(results)
+        return df[cols_order]
+    else:
+        arr = np.array([[res[col] for col in cols_order] for res in results], dtype=np.float64) # Ensure float array
+        if single_input and arr.shape[0] == 1:
+            return arr.flatten() # Return 1D array for single input
+        else:
+            return arr # Return 2D array
