@@ -58,12 +58,15 @@ import pytorf
 
 categories = [
     "aircraft-pfp",
-    "aircraft-insitu", "aircraft-flask", # If flask is not in CH4 data
-    "surface-insitu", "surface-flask",
+    "aircraft-insitu", 
+    "aircraft-flask",
+    "surface-insitu", 
+    "surface-flask",
     "surface-pfp",
     "tower-insitu",
     "aircore",
-    "shipboard-insitu" , "shipboard-flask"
+    "shipboard-insitu" , 
+    "shipboard-flask"
 ]
 
 obspack_ch4_dir = Path("/PATH/obspack//obspack_ch4_1_GLOBALVIEWplus_v6.0_2023-12-01/data/nc")
