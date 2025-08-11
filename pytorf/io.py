@@ -546,7 +546,7 @@ def obs_read_csvy(f: Union[str, Path], n_header_lines: int = 100, **kwargs) -> T
 
 
 def obs_write_csvy(
-    dt_frame: Frame,
+    dt_frame: dt.Frame,
     notes: List[str],
     out: Union[str, Path],
     sep: str = ",",
@@ -565,7 +565,7 @@ def obs_write_csvy(
     """
     if not DT_AVAILABLE:
         raise ImportError("datatable library is required for obs_write_csvy.")
-    if not isinstance(dt_frame, Frame):
+    if not isinstance(dt_frame, dt.Frame):
         raise TypeError("Input dt_frame must be a datatable Frame.")
 
     out_path = Path(out)
