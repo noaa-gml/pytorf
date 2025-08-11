@@ -42,21 +42,21 @@ def obs_summary(
     )
     index[:, 'n'] = range(1, index.nrows + 1)
 
-    # --- Vectorized assignment of sectors from filenames ---
+    # --- Vectorized assignment of sectors from filenames (CORRECTED) ---
     if verbose:
         print("Vectorizing assignment of sectors from filenames...")
 
+    # Create a regex pattern that looks for any of the category strings.
+    # The parentheses create a "capturing group" for the category itself.
     category_pattern = f"({'|'.join(re.escape(c) for c in categories)})"
 
-    # Force the execution of re.match by using the frame's selector `[:, ...]`
-    sector_matches = index[:, dt.re.match(f.name, category_pattern)]
+    # Use dt.str.extract to pull out the first captured group (the sector).
+    # This will return a new single-column Frame containing the extracted
+    # sectors for each file, or NA if no category was found in the filename.
+    extracted_sectors = index[:, dt.str.extract(f.name, category_pattern, 1)]
 
-    # Now `sector_matches` is a real Frame, so we can check its properties.
-    if sector_matches.ncols > 1:
-        index[:, 'sector'] = sector_matches[:, 1]
-    else:
-        # If no files matched the pattern, create an empty string column.
-        index[:, 'sector'] = dt.str32
+    # Assign the contents of that new frame to the 'sector' column.
+    index[:, 'sector'] = extracted_sectors
     # --- End of Correction ---
 
     if verbose:
