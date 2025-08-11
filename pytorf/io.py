@@ -42,14 +42,13 @@ def obs_summary(
     )
     index[:, 'n'] = range(1, index.nrows + 1)
 
-    # --- Vectorized assignment of sectors and AGL from filenames (CORRECTED) ---
+    # --- Vectorized assignment of sectors from filenames ---
     if verbose:
-        print("Vectorizing assignment of sectors and AGL from filenames...")
+        print("Vectorizing assignment of sectors from filenames...")
 
     category_pattern = f"({'|'.join(re.escape(c) for c in categories)})"
 
     # Force the execution of re.match by using the frame's selector `[:, ...]`
-    # This evaluates the expression and returns a new datatable Frame.
     sector_matches = index[:, dt.re.match(f.name, category_pattern)]
 
     # Now `sector_matches` is a real Frame, so we can check its properties.
@@ -58,14 +57,6 @@ def obs_summary(
     else:
         # If no files matched the pattern, create an empty string column.
         index[:, 'sector'] = dt.str32
-
-    # Do the same for the 'agl' (Above Ground Level) value from the filename.
-    agl_matches = index[:, dt.re.match(f.name, r'(\d+)magl')]
-    if agl_matches.ncols > 1:
-        index[:, 'agl'] = agl_matches[:, 1].to_float64()
-    else:
-        # If no files matched, create an empty float column.
-        index[:, 'agl'] = dt.float64
     # --- End of Correction ---
 
     if verbose:
@@ -73,7 +64,7 @@ def obs_summary(
         if 'sector' in index.names and index[~isna(f.sector), :].nrows > 0:
             summary = index[:, count(), by(f.sector)]
             summary.sort('count', reverse=True)
-
+            
             total_assigned = index[~isna(f.sector), dt.count()][0,0]
             total_frame = dt.Frame(sector=["Total assigned sectors"], N=[total_assigned])
             print("\nFile counts by assigned sector:")
@@ -85,10 +76,6 @@ def obs_summary(
         unassigned_count = index[isna(f.sector), dt.count()][0,0]
         if unassigned_count > 0:
             print(f"\nFiles without an assigned sector: {unassigned_count}")
-
-        if 'agl' in index.names:
-            agl_present = index[~isna(f.agl), dt.count()][0, 0]
-            print(f"\nDetected {agl_present} files with AGL in name.")
 
     if out:
         try:
