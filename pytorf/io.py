@@ -46,17 +46,20 @@ def obs_summary(
     if verbose:
         print("Vectorizing assignment of sectors from filenames...")
 
-    # Initialize the 'sector' column with NAs of a string type
-    index[:, 'sector'] = dt.str32
+    # Use a standard Python list comprehension for maximum compatibility.
+    # This iterates through each filename and finds the first matching category.
+    file_names_list = index['name'].to_list()[0]
+    sectors = []
+    for name in file_names_list:
+        found_sector = None
+        for category in categories:
+            if category in name:
+                found_sector = category
+                break # Stop at the first match
+        sectors.append(found_sector)
 
-    # Loop through each category and update the 'sector' column where filenames match
-    for category in categories:
-        # Create a boolean expression that finds rows matching the current category
-        # AND where the sector has not yet been assigned. This takes the first match.
-        needs_update = dt.re.search(f.name, re.escape(category)) & dt.isna(f.sector)
-        
-        # Use update() with a filter to modify only the necessary rows
-        index[needs_update, 'sector'] = category
+    # Assign the list of found sectors to the new 'sector' column.
+    index[:, 'sector'] = dt.Frame(sectors)
     # --- End of Correction ---
 
     if verbose:
