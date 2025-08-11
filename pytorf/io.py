@@ -47,7 +47,6 @@ def obs_summary(
         print("Vectorizing assignment of sectors from filenames...")
 
     # Use a standard Python list comprehension for maximum compatibility.
-    # This iterates through each filename and finds the first matching category.
     file_names_list = index['name'].to_list()[0]
     sectors = []
     for name in file_names_list:
@@ -66,8 +65,12 @@ def obs_summary(
         print(f"Number of files found: {index.nrows}")
         if 'sector' in index.names and index[~isna(f.sector), :].nrows > 0:
             summary = index[:, count(), by(f.sector)]
-            summary.sort('count', reverse=True)
             
+            # Sort in ascending order first
+            summary.sort('count')
+            # Then reverse the frame to get descending order
+            summary = summary[::-1, :]
+
             total_assigned = index[~isna(f.sector), dt.count()][0,0]
             total_frame = dt.Frame(sector=["Total assigned sectors"], N=[total_assigned])
             print("\nFile counts by assigned sector:")
