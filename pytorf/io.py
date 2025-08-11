@@ -48,8 +48,8 @@ def obs_summary(
         print("Vectorizing assignment of sectors and AGL from filenames...")
 
     category_pattern = f"({'|'.join(re.escape(c) for c in categories)})"
-    index[:, 'sector'] = f.name.re_extract(category_pattern, group=1)
-    index[:, 'agl'] = f.name.re_extract(r'(\d+)magl', group=1)[0].to_float64()
+    index[:, 'sector'] = dt.re.match(f.name, category_pattern)[:, 1]
+    index[:, 'agl'] = dt.re.match(f.name, r'(\d+)magl')[:, 1].to_float64()
 
     if verbose:
         print(f"Number of files found: {index.nrows}")
