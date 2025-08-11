@@ -53,7 +53,7 @@ def obs_summary(
     sector_matches = dt.re.match(index['name'], category_pattern)
 
     # Now `sector_matches` is a real Frame, so we can check its properties.
-    if sector_matches and sector_matches.ncols > 1:
+    if sector_matches is not None and sector_matches.ncols > 1:
         index[:, 'sector'] = sector_matches[:, 1]
     else:
         # If no files matched the pattern, create an empty string column.
@@ -61,7 +61,7 @@ def obs_summary(
 
     # Do the same for the 'agl' (Above Ground Level) value from the filename.
     agl_matches = dt.re.match(index['name'], r'(\d+)magl')
-    if agl_matches and agl_matches.ncols > 1:
+    if agl_matches is not None and agl_matches.ncols > 1:
         index[:, 'agl'] = agl_matches[:, 1].to_float64()
     else:
         # If no files matched, create an empty float column.
