@@ -1,5 +1,5 @@
 
-    """
+"""
 Functions for reading ObsPack files (.txt, .nc) and metadata.
 """
 import datatable as dt
