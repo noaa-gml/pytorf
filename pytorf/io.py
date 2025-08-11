@@ -469,7 +469,7 @@ def obs_read_nc_att(
          # Consider returning the list of dicts instead or handling complex types
          return None # Or return attribute_list
      
-def obs_read_csvy(f: Union[str, Path], n_header_lines: int = 100, **kwargs) -> Tuple[Optional[Dict], Optional[Frame]]:
+def obs_read_csvy(f: Union[str, Path], n_header_lines: int = 100, **kwargs) -> Tuple[Optional[Dict], Optional[dt.Frame]]:
     """
     Reads a CSVY file, prints YAML header, and returns header dict and data frame.
 
