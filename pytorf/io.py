@@ -46,32 +46,38 @@ def obs_summary(
     if verbose:
         print("Vectorizing assignment of sectors and AGL from filenames...")
 
-    # Pattern to capture one of the specified categories
     category_pattern = f"({'|'.join(re.escape(c) for c in categories)})"
 
-    # Use dt.re.match to find matches. It returns a Frame where each column
-    # corresponds to a capture group. C0 is the full match, C1 is the first group.
-    # The returned Frame has the same number of rows as the input column.
-    # Non-matches result in NA.
-    index[:, 'sector'] = dt.re.match(f.name, category_pattern)[:, 1]
+    # Perform the regex matching. This returns a new Frame where each column
+    # corresponds to a capture group from the regex.
+    sector_matches = dt.re.match(index[:, f.name], category_pattern)
 
-    # Similarly, for AGL, the pattern (\d+)magl captures the numeric part.
-    # We select the first capture group (column 1) and convert it to float64.
-    # The to_float64() function will correctly handle NAs for non-matches.
-    index[:, 'agl'] = dt.re.match(f.name, r'(\d+)magl')[:, 1].to_float64()
+    # Assign the first captured group (column 1) to the 'sector' column.
+    # If a file's name doesn't match, its value will be NA, which is correct.
+    if sector_matches.ncols > 1:
+        index[:, 'sector'] = sector_matches[:, 1]
+    else:
+        # If there are no matches at all, create an empty column to avoid errors later
+        index[:, 'sector'] = dt.str32
+
+    # Do the same for the 'agl' (Above Ground Level) value from the filename
+    agl_matches = dt.re.match(index[:, f.name], r'(\d+)magl')
+    if agl_matches.ncols > 1:
+        # Convert the captured group of numbers to float64
+        index[:, 'agl'] = agl_matches[:, 1].to_float64()
+    else:
+        index[:, 'agl'] = dt.float64
     # --- End of Correction ---
 
     if verbose:
         print(f"Number of files found: {index.nrows}")
-        # Check if 'sector' column was created and has non-NA values
         if 'sector' in index.names and index[~isna(f.sector), :].nrows > 0:
             summary = index[:, count(), by(f.sector)]
-            summary.sort('count', reverse=True) # Sort for better readability
+            summary.sort('count', reverse=True)
             
             total_assigned = index[~isna(f.sector), dt.count()][0,0]
             total_frame = dt.Frame(sector=["Total assigned sectors"], N=[total_assigned])
             print("\nFile counts by assigned sector:")
-            # Use rbind to add the total, ensure column names match
             summary.names = {'count': 'N'}
             print(rbind(summary, total_frame, force=True))
         else:
