@@ -48,22 +48,17 @@ def obs_summary(
 
     category_pattern = f"({'|'.join(re.escape(c) for c in categories)})"
 
-    # Perform the regex matching. This returns a new Frame where each column
-    # corresponds to a capture group from the regex.
-    sector_matches = dt.re.match(index[:, f.name], category_pattern)
+    # Forcing the computation of the regex match to return a new Frame
+    # by selecting the column from the original frame first.
+    sector_matches = dt.re.match(index['name'], category_pattern)
 
-    # Assign the first captured group (column 1) to the 'sector' column.
-    # If a file's name doesn't match, its value will be NA, which is correct.
-    if sector_matches.ncols > 1:
+    if sector_matches and sector_matches.ncols > 1:
         index[:, 'sector'] = sector_matches[:, 1]
     else:
-        # If there are no matches at all, create an empty column to avoid errors later
         index[:, 'sector'] = dt.str32
 
-    # Do the same for the 'agl' (Above Ground Level) value from the filename
-    agl_matches = dt.re.match(index[:, f.name], r'(\d+)magl')
-    if agl_matches.ncols > 1:
-        # Convert the captured group of numbers to float64
+    agl_matches = dt.re.match(index['name'], r'(\d+)magl')
+    if agl_matches and agl_matches.ncols > 1:
         index[:, 'agl'] = agl_matches[:, 1].to_float64()
     else:
         index[:, 'agl'] = dt.float64
