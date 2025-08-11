@@ -48,19 +48,23 @@ def obs_summary(
 
     category_pattern = f"({'|'.join(re.escape(c) for c in categories)})"
 
-    # Forcing the computation of the regex match to return a new Frame
-    # by selecting the column from the original frame first.
+    # By selecting the column with index['name'], we force the expression to
+    # execute and return a new datatable Frame with the match results.
     sector_matches = dt.re.match(index['name'], category_pattern)
 
+    # Now `sector_matches` is a real Frame, so we can check its properties.
     if sector_matches and sector_matches.ncols > 1:
         index[:, 'sector'] = sector_matches[:, 1]
     else:
+        # If no files matched the pattern, create an empty string column.
         index[:, 'sector'] = dt.str32
 
+    # Do the same for the 'agl' (Above Ground Level) value from the filename.
     agl_matches = dt.re.match(index['name'], r'(\d+)magl')
     if agl_matches and agl_matches.ncols > 1:
         index[:, 'agl'] = agl_matches[:, 1].to_float64()
     else:
+        # If no files matched, create an empty float column.
         index[:, 'agl'] = dt.float64
     # --- End of Correction ---
 
