@@ -46,17 +46,17 @@ def obs_summary(
     if verbose:
         print("Vectorizing assignment of sectors from filenames...")
 
-    # Create a regex pattern that looks for any of the category strings.
-    # The parentheses create a "capturing group" for the category itself.
-    category_pattern = f"({'|'.join(re.escape(c) for c in categories)})"
+    # Initialize the 'sector' column with NAs of a string type
+    index[:, 'sector'] = dt.str32
 
-    # Use dt.str.extract to pull out the first captured group (the sector).
-    # This will return a new single-column Frame containing the extracted
-    # sectors for each file, or NA if no category was found in the filename.
-    extracted_sectors = index[:, dt.str.extract(f.name, category_pattern, 1)]
-
-    # Assign the contents of that new frame to the 'sector' column.
-    index[:, 'sector'] = extracted_sectors
+    # Loop through each category and update the 'sector' column where filenames match
+    for category in categories:
+        # Create a boolean expression that finds rows matching the current category
+        # AND where the sector has not yet been assigned. This takes the first match.
+        needs_update = dt.re.search(f.name, re.escape(category)) & dt.isna(f.sector)
+        
+        # Use update() with a filter to modify only the necessary rows
+        index[needs_update, 'sector'] = category
     # --- End of Correction ---
 
     if verbose:
