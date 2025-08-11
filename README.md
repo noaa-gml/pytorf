@@ -58,12 +58,12 @@ import pytorf
 
 categories = [
     "aircraft-pfp",
-    "aircraft-insitu", #"aircraft-flask", # If flask is not in CH4 data
-    "surface-insitu", #"surface-flask",
+    "aircraft-insitu", "aircraft-flask", # If flask is not in CH4 data
+    "surface-insitu", "surface-flask",
     "surface-pfp",
     "tower-insitu",
     "aircore",
-    "shipboard-insitu" #, "shipboard-flask"
+    "shipboard-insitu" , "shipboard-flask"
 ]
 
 obspack_ch4_dir = Path("/PATH/obspack/obspack_ch4_1_GLOBALVIEWplus_v5.1_2023-03-08/data/nc/")
@@ -79,21 +79,29 @@ index_ch4 = pytorf.obs_summary(
 ```
 Number of files found: 429
 
+Vectorizing assignment of sectors from filenames...
+Number of files found: 479
+
 File counts by assigned sector:
-   | sector                  count      N
-   | str64                   int64  int32
--- + ----------------------  -----  -----
- 0 | aircore                     1     NA
- 1 | aircraft-insitu            15     NA
- 2 | aircraft-pfp               40     NA
- 3 | shipboard-insitu            1     NA
- 4 | surface-insitu            174     NA
- 5 | surface-pfp                33     NA
- 6 | tower-insitu               51     NA
- 7 | Total assigned sectors     NA    315
-[8 rows x 3 columns]
+   | sector                      N
+   | str32                   int64
+-- + ----------------------  -----
+ 0 | tower-insitu              150
+ 1 | surface-pfp                33
+ 2 | surface-insitu            121
+ 3 | surface-flask             106
+ 4 | shipboard-insitu            1
+ 5 | shipboard-flask             4
+ 6 | aircraft-pfp               42
+ 7 | aircraft-insitu            17
+ 8 | aircraft-flask              4
+ 9 | aircore                     1
+10 | Total assigned sectors    479
+[11 rows x 2 columns]
+
 
 ```
+
 
 ## Contributing
 
