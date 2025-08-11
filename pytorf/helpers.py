@@ -255,26 +255,3 @@ def obs_footname(
     fullpath: bool = False,
     time: Optional[str] = None
 ) -> str:
-    """
-    Generates the expected HYSPLIT footprint NetCDF filename.
-    """
-    lat_abs = abs(lat)
-    lon_abs = abs(lon)
-    lats = f"{lat_abs:.4f}{'N' if lat >= 0 else 'S'}"
-    lons = f"{lon_abs:.4f}{'E' if lon >= 0 else 'W'}"
-
-    s_yr = f"{year:04d}"
-    s_mo = f"{month:02d}"
-    s_dy = f"{day:02d}"
-    s_hr = f"{hour:02d}"
-    s_mn = f"{minute:02d}"
-
-    s_alt = f"{alt:05.0f}"
-
-    basename = f"hysplit-footprint_{s_yr}{s_mo}{s_dy}{s_hr}{s_mn}_{lats}{lons}_{s_alt}magl.nc"
-
-    if fullpath:
-        warnings.warn("fullpath=True is not fully implemented without a defined directory structure.")
-        return basename
-    else:
-        return basename
