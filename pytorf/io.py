@@ -141,9 +141,10 @@ def obs_read(
 
     list_of_frames = []
     for i in range(df_category.nrows):
-        row = df_category[i, :]
-        file_id = Path(row[0, f.id])
-        file_name = row[0, f.name]
+        # FIX: Extract scalar value from Frame before passing to Path()
+        file_id_str = df_category[i, 'id'].to_list()[0]
+        file_name = df_category[i, 'name'].to_list()[0]
+        file_id = Path(file_id_str)
 
         if verbose:
             print(f"  {i+1}/{df_category.nrows}: Reading {file_name}")
@@ -164,6 +165,10 @@ def obs_read(
 
             def safe_float(val): return float(val) if val is not None else None
             
+            # Get the agl value if the column exists
+            row = df_category[i,:]
+            agl_val = row[0, f.agl] if 'agl' in row.names else None
+
             dt_file[:, update(
                 rtorf_filename=file_name,
                 rtorf_sector=category,
@@ -178,7 +183,7 @@ def obs_read(
                 lab_1_abbr=metadata.get('lab_1_abbr'),
                 dataset_calibration_scale=metadata.get('dataset_calibration_scale'),
                 altitude_comment=metadata.get('altitude_comment'),
-                agl_from_filename=row[0, f.agl] if 'agl' in row.names else None
+                agl_from_filename=agl_val
             )]
 
             if 'altitude' in dt_file.names:
@@ -246,8 +251,10 @@ def obs_read_nc(
 
     list_of_frames = []
     for i in range(df_category.nrows):
-        file_id = Path(df_category[i, f.id])
-        file_name = df_category[i, f.name]
+        # FIX: Extract scalar value from Frame before passing to Path()
+        file_id_str = df_category[i, 'id'].to_list()[0]
+        file_name = df_category[i, 'name'].to_list()[0]
+        file_id = Path(file_id_str)
 
         if verbose:
             print(f"  {i+1}/{df_category.nrows}: Reading {file_name}")
@@ -270,7 +277,14 @@ def obs_read_nc(
                 global_attrs = {attr: nc.getncattr(attr) for attr in nc.ncattrs()}
                 
                 # Add attributes as columns
-                # ... (attribute handling logic remains similar) ...
+                if att:
+                    for key, value in global_attrs.items():
+                        # Ensure value is scalar before adding as a column
+                        if isinstance(value, (str, int, float, bool)):
+                            dt_file[:, key] = value
+                        else:
+                            if verbose:
+                                warnings.warn(f"Skipping non-scalar global attribute '{key}' of type {type(value)} in file {file_name}")
 
                 if expr is not None:
                     dt_file = dt_file[expr, :]
@@ -293,280 +307,3 @@ def obs_read_nc(
     except Exception as e:
         print(f"Error combining NetCDF data frames: {e}")
         return None
-
-# --- obs_meta ---
-def obs_meta(
-    index: dt.Frame,
-    verbose: bool = True,
-    # Re-use extraction parameters from obs_read
-    meta_patterns: Optional[Dict[str, str]] = None,
-    meta_positions: Optional[Dict[str, int]] = None,
-    fill_value: float = -1e+34, # Needed if converting elevation
-    as_list: bool = False # Ignored
-) -> Optional[dt.Frame]:
-    """
-    Reads only the metadata from the header of each ObsPack .txt file in the index.
-    """
-    if not isinstance(index, dt.Frame) or index.nrows == 0:
-        warnings.warn("Input index must be a non-empty datatable Frame.")
-        return None
-    if not all(c in index.names for c in ['id', 'name', 'sector']):
-         warnings.warn("Index frame must contain 'id', 'name', and 'sector' columns.")
-         return None
-
-    if meta_patterns is None and meta_positions is None:
-         meta_positions = {
-            "site_code": 15, "site_latitude": 18, "site_longitude": 19,
-            "site_name": 15, "site_country": 18, "dataset_project": 21,
-            "lab_1_abbr": 16, "dataset_calibration_scale": 31,
-            "site_elevation": 20, "altitude_comment": 22, "site_utc2lst": 18
-         }
-         meta_lookup_keys = {
-            "site_code": "site_code", "site_latitude": "site_latitude",
-            "site_longitude": "site_longitude", "site_name": "site_name",
-            "site_country": "site_country", "dataset_project": "dataset_project",
-            "lab_1_abbr": "lab_1_abbr", "dataset_calibration_scale": "dataset_calibration_scale",
-            "site_elevation": " site_elevation", "altitude_comment": " altitude:comment",
-            "site_utc2lst": "site_utc2lst"
-         }
-         use_patterns = False
-    elif meta_patterns is not None:
-         meta_lookup_keys = {k: k for k in meta_patterns.keys()}
-         use_patterns = True
-         compiled_patterns = {k: re.compile(v) for k, v in meta_patterns.items()}
-    else: # meta_positions is not None
-         meta_lookup_keys = {k: k for k in meta_positions.keys()}
-         use_patterns = False
-
-    def get_metadata(lines: List[str]) -> Dict[str, Any]:
-        metadata = {}
-        for key, lookup in meta_lookup_keys.items():
-            value = None
-            for line in lines:
-                if use_patterns:
-                    match = compiled_patterns[key].search(line)
-                    if match:
-                        try: value = match.group(1).strip(); break
-                        except IndexError: pass
-                else:
-                    if lookup in line:
-                        pos = meta_positions[key]
-                        if len(line) >= pos: value = line[pos-1:].strip(); break
-            metadata[key] = value
-        return metadata
-
-    metadata_list = []
-    if verbose: print("Extracting metadata...")
-    for i in range(index.nrows):
-        row = index[i, :]
-        file_id = Path(row[0, f.id])
-        file_name = row[0, f.name]
-        sector = row[0, f.sector]
-        agl_val = row[0, f.agl] if 'agl' in row.names else None
-
-        if verbose:
-            print(f"  {i+1}/{index.nrows}: Reading header {file_name}")
-
-        try:
-            with file_id.open('r', encoding='utf-8', errors='ignore') as f_in:
-                first_line = f_in.readline().split()
-                if len(first_line) < 4: raise ValueError("Cannot determine header size")
-                num_header_lines = int(first_line[3])
-                f_in.seek(0)
-                header_content = [f_in.readline() for _ in range(num_header_lines)]
-
-            file_meta = get_metadata(header_content)
-            file_meta['rtorf_filename'] = file_name
-            file_meta['rtorf_filepath'] = str(file_id)
-            file_meta['rtorf_sector'] = sector
-            file_meta['rtorf_agl_filename'] = agl_val
-            file_meta['rtorf_file_index'] = i + 1
-
-            def safe_float_meta(key, fill_val=None):
-                 val_str = file_meta.get(key)
-                 if val_str is None: return None
-                 try:
-                     val_num = float(val_str)
-                     return None if fill_val is not None and abs(val_num - fill_val) < 1e-9 else val_num
-                 except (ValueError, TypeError):
-                     return None
-
-            file_meta['site_elevation'] = safe_float_meta('site_elevation', fill_value)
-            file_meta['site_latitude'] = safe_float_meta('site_latitude')
-            file_meta['site_longitude'] = safe_float_meta('site_longitude')
-            file_meta['site_utc2lst'] = safe_float_meta('site_utc2lst')
-
-            metadata_list.append(file_meta)
-
-        except FileNotFoundError:
-             warnings.warn(f"File not found: {file_id}. Skipping metadata.")
-        except ValueError as ve:
-             warnings.warn(f"Error parsing header for {file_name}: {ve}. Skipping metadata.")
-        except Exception as e:
-            warnings.warn(f"Unexpected error processing header for {file_name}: {type(e).__name__} - {e}. Skipping metadata.")
-            if verbose: import traceback; traceback.print_exc()
-
-    if not metadata_list:
-        print("No metadata could be extracted.")
-        return None
-
-    try:
-        meta_dt = dt.Frame(metadata_list)
-        if verbose: print(f"\nMetadata frame shape: {meta_dt.shape}")
-        return meta_dt
-    except Exception as frame_err:
-        print(f"Error creating final metadata frame: {frame_err}")
-        return None
-
-def obs_read_nc_att(
-    index: dt.Frame,
-    as_list: bool = False, # Ignored
-    verbose: bool = False,
-    show_warnings: bool = False
-) -> Optional[dt.Frame]:
-     warnings.warn("obs_read_nc_att implementation is basic. Review needed.")
-     if not isinstance(index, dt.Frame) or index.nrows == 0: return None
-     if not all(c in index.names for c in ['id', 'name']): return None
-
-     attribute_list = []
-     if verbose: print("Extracting NetCDF global attributes...")
-     for i in range(index.nrows):
-        row = index[i, :]
-        file_id = Path(row[0, f.id])
-        file_name = row[0, f.name]
-        if verbose: print(f"  {i+1}/{index.nrows}: Reading attributes {file_name}")
-
-        try:
-            with netCDF4.Dataset(str(file_id), 'r') as nc:
-                 file_attrs = {attr: nc.getncattr(attr) for attr in nc.ncattrs()}
-                 file_attrs['rtorf_filename'] = file_name
-                 file_attrs['rtorf_filepath'] = str(file_id)
-                 attribute_list.append(file_attrs)
-        except Exception as e:
-             warnings.warn(f"Error reading attributes from {file_name}: {e}")
-
-     if not attribute_list: return None
-     try:
-         attr_dt = dt.Frame(attribute_list)
-         if verbose: print(f"\nAttribute frame shape: {attr_dt.shape}")
-         return attr_dt
-     except Exception as frame_err:
-         print(f"Error creating attribute frame (attributes might be complex or inconsistent): {frame_err}")
-         return None
-     
-def obs_read_csvy(f: Union[str, Path], n_header_lines: int = 100, **kwargs) -> Tuple[Optional[Dict], Optional[dt.Frame]]:
-    """
-    Reads a CSVY file, prints YAML header, and returns header dict and data frame.
-    """
-    f_path = Path(f)
-    yaml_content = []
-    in_yaml = False
-    header_data = None
-    dt_frame = None
-    skip_rows = 0
-
-    try:
-        with f_path.open('r', encoding='utf-8') as file:
-            found_delimiters = 0
-            for i, line in enumerate(file):
-                current_line_num = i + 1
-                if line.strip() == '---':
-                    found_delimiters += 1
-                    if found_delimiters == 1:
-                        in_yaml = True
-                    elif found_delimiters == 2:
-                        skip_rows = current_line_num
-                        break
-                elif in_yaml:
-                    yaml_content.append(line)
-
-                if current_line_num >= n_header_lines * 2:
-                    warnings.warn(f"YAML delimiters '---' not found within expected lines in {f_path}.")
-                    skip_rows = 0
-                    yaml_content = []
-                    break
-            else:
-                if found_delimiters == 1:
-                     warnings.warn(f"YAML end delimiter '---' not found in {f_path}.")
-                     skip_rows = current_line_num
-                     yaml_content = []
-
-        if yaml_content:
-            try:
-                header_data = yaml.safe_load("".join(yaml_content))
-                print("--- YAML Header ---")
-                print("".join(yaml_content).strip())
-                print("-------------------")
-            except yaml.YAMLError as ye:
-                 warnings.warn(f"Error parsing YAML header in {f_path}: {ye}")
-                 header_data = {"error": "YAML parsing failed", "raw": "".join(yaml_content)}
-                 print("--- Raw Header ---")
-                 print("".join(yaml_content).strip())
-                 print("------------------")
-
-        dt_frame = dt.fread(str(f_path), skip_to_line=skip_rows + 1, **kwargs)
-
-    except FileNotFoundError:
-        print(f"Error: File not found {f_path}")
-    except Exception as e:
-        print(f"Error reading CSVY file {f_path}: {e}")
-
-    return header_data, dt_frame
-
-
-def obs_write_csvy(
-    dt_frame: dt.Frame,
-    notes: List[str],
-    out: Union[str, Path],
-    sep: str = ",",
-    **kwargs
-):
-    """
-    Writes a datatable Frame to a CSVY file with YAML header.
-    """
-    if not isinstance(dt_frame, dt.Frame):
-        raise TypeError("Input dt_frame must be a datatable Frame.")
-
-    out_path = Path(out)
-    metadata = {
-        'name': 'Metadata',
-        'notes': notes,
-        'structure': {
-            'rows': dt_frame.nrows,
-            'columns': dt_frame.ncols,
-            'names': dt_frame.names,
-            'types': [str(t) for t in dt_frame.stypes]
-        },
-        'generated_by': 'rtorf Python package',
-        'timestamp': pydt.datetime.now(pydt.timezone.utc).isoformat()
-    }
-
-    try:
-        with out_path.open('w', encoding='utf-8') as f:
-            f.write("---\n")
-            yaml.dump(metadata, f, default_flow_style=False, sort_keys=False, indent=2)
-            f.write("---\n")
-
-        dt_frame.to_csv(str(out_path), sep=sep, header=True, append=True, **kwargs)
-
-    except Exception as e:
-        print(f"Error writing CSVY file {out_path}: {e}")
-     
-def get_metadata(lines: List[str]) -> Dict[str, Any]:
-    metadata = {key: None for key in meta_positions}
-    keys_to_find = set(meta_positions.keys())
-
-    for line in lines:
-        if not keys_to_find:
-            break
-
-        found_keys_in_line = []
-        for key in keys_to_find:
-            lookup, pos = meta_positions[key]
-            if lookup in line and len(line) >= pos:
-                metadata[key] = line[pos-1:].strip()
-                found_keys_in_line.append(key)
-
-        keys_to_find.difference_update(found_keys_in_line)
-
-    return metadata
